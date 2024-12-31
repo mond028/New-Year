@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy 2025!</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364);
+            color: white;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 50px 20px;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin: 0;
+            background: linear-gradient(90deg, #ff6f61, #f9ed69, #08d9d6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        h2 {
+            margin: 20px 0;
+            font-size: 2em;
+            color: #f9ed69;
+        }
+
+        .message {
+            font-size: 1.3em;
+            margin: 20px 0;
+            color: #c5c6c7;
+            line-height: 1.6em;
+            animation: fadeIn 3s ease-in-out;
+        }
+
+        .countdown {
+            font-size: 2em;
+            margin: 20px 0;
+            color: #ff6f61;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 1.1em;
+            margin-top: 20px;
+            border: 2px solid #f9ed69;
+            border-radius: 5px;
+            outline: none;
+            text-align: center;
+        }
+
+        input:focus {
+            border-color: #ff6f61;
+            box-shadow: 0 0 8px #f9ed69;
+        }
+
+        .special-button {
+            display: inline-block;
+            padding: 12px 25px;
+            font-size: 1.2em;
+            background: linear-gradient(90deg, #ff6f61, #f9ed69);
+            color: #004e92;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(255, 111, 97, 0.4);
+            margin-top: 15px;
+        }
+
+        .special-button:hover {
+            background: linear-gradient(90deg, #f9ed69, #ff6f61);
+            color: white;
+            transform: translateY(-5px) scale(1.1);
+        }
+
+        .hidden-message {
+            font-size: 1.5em;
+            color: #ff6f61;
+            margin-top: 30px;
+            display: none;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .fireworks {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes textGlow {
+            from {
+                text-shadow: 0 0 5px #ff6f61, 0 0 10px #f9ed69, 0 0 20px #08d9d6;
+            }
+            to {
+                text-shadow: 0 0 10px #ff6f61, 0 0 20px #f9ed69, 0 0 30px #08d9d6;
+            }
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .message {
+                font-size: 1.1em;
+            }
+            input {
+                font-size: 1em;
+                padding: 8px;
+            }
+            .special-button {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.3em;
+            }
+            .message {
+                font-size: 1em;
+            }
+            input {
+                font-size: 0.9em;
+                padding: 6px;
+            }
+            .special-button {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="mainHeading">Happy New Year 2025! 🎉</h1>
+        <h2>A year full of surprises awaits!</h2>
+        <input type="text" id="nameInput" placeholder="Enter your name" disabled>
+        <button class="special-button" onclick="displayMessage()" id="showButton" disabled>Show Surprise</button>
+        <p class="hidden-message" id="hiddenMessage"></p>
+        <p class="countdown" id="countdown"></p>
+    </div>
+    <canvas class="fireworks"></canvas>
+
+    <!-- Adding Fireworks sound -->
+    <audio id="fireworkSound" src="videoplayback.weba" preload="auto"></audio>
+
+    <script>
+        const canvas = document.querySelector(".fireworks");
+        const ctx = canvas.getContext("2d");
+        const nameInput = document.getElementById("nameInput");
+        const hiddenMessage = document.getElementById("hiddenMessage");
+        const mainHeading = document.getElementById("mainHeading");
+        const countdownElement = document.getElementById("countdown");
+        const showButton = document.getElementById("showButton");
+        const fireworkSound = document.getElementById("fireworkSound");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const particles = [];
+        const colors = ["#ff2e63", "#08d9d6", "#f9ed69", "#e84545", "#32e875"];
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.radius = Math.random() * 3 + 2;
+                this.color = color;
+                this.velocityX = (Math.random() - 0.5) * 8;
+                this.velocityY = (Math.random() - 0.5) * 8;
+                this.alpha = 1;
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+            update() {
+                this.x += this.velocityX;
+                this.y += this.velocityY;
+                this.alpha -= 0.02;
+            }
+        }
+
+        function createFirework(x, y) {
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+            }
+            fireworkSound.play();  // Play sound effect when fireworks appear
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const particle = particles[i];
+                if (particle.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                particle.update();
+                particle.draw();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function randomFireworks() {
+            setInterval(() => {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                createFirework(x, y);
+            }, 1000);
+        }
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const newYear = new Date('2025-01-01T00:00:00').getTime();
+            const timeLeft = newYear - now;
+
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            countdownElement.innerHTML = `Time remaining until 2025: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+            if (timeLeft <= 0) {
+                countdownElement.innerHTML = "Happy New Year 2025!";
+                nameInput.disabled = false;
+                showButton.disabled = false;
+                createFirework(canvas.width / 2, canvas.height / 2);
+            }
+        }
+
+        function displayMessage() {
+            const name = nameInput.value.trim();
+            if (name) {
+                hiddenMessage.style.display = "block";
+                hiddenMessage.textContent = `Happy New Year, ${name}! 🎉 Here's to a year filled with joy, surprises, and unforgettable moments. Let's make 2025 extraordinary together! 🌟`;
+                mainHeading.textContent = `Welcome to 2025, ${name}! 🎇`;
+                for (let i = 0; i < 10; i++) {  // Create more fireworks on button click
+                    createFirework(Math.random() * canvas.width, Math.random() * canvas.height);
+                }
+            } else {
+                hiddenMessage.style.display = "none";
+            }
+        }
+
+        // Run the countdown and fireworks
+        setInterval(updateCountdown, 1000);
+        randomFireworks();
+    </script>
+</body>
+</html>
